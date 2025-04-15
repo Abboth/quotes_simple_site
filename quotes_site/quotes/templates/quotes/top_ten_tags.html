@@ -1,0 +1,9 @@
+<div class="col-md-2 tags-box">
+    <h2>Top Ten tags</h2>
+    {% for tag in top_tags %}
+    <span class="tag-item">
+        <a class="tag" style="font-size: 20px;" href="{% url 'quotes:tag_quotes' tag.name %}">{{ tag.name }}</a>
+    </span>
+    {% endfor %}
+</div>
+

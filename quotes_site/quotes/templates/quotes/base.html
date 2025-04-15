@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'quotes/style.css' %}">
+    <title>Quotes</title>
+</head>
+<body>
+<div class="container">
+    <div class="row header-box pt-4 mb-5">
+        <div class="col-md-8">
+            <h1>
+                <a href="/" style="text-decoration: none">Quotes to Scrape</a>
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'users:logout' %}" class="btn btn-primary">Logout</a>
+                {% else %}
+                <a href="{% url 'users:sign_up' %}" class="btn btn-info">Sign Up</a>
+                <a href="{% url 'users:login' %}" class="btn btn-primary">Login</a>
+                {% endif %}
+
+            </p>
+        </div>
+    </div>
+
+    {% if pending_quotes_count > 0 %}
+    <div class="text-center my-3">
+        <a href="{% url 'quotes:pending_quotes' %}" class="btn btn-primary position-relative">
+            Pending Quotes
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ pending_quotes_count }}
+        </span>
+        </a>
+    </div>
+    {% endif %}
+
+
+    {% block content %}
+
+    {% endblock %}
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>.
