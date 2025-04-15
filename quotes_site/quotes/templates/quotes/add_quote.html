@@ -45,8 +45,12 @@
 
     <div class="mb-3">
         <label for="quote" class="form-label">Quote</label>
-        <textarea class="form-control" id="quote" name="quote"
-                  rows="4">{{ form.quote.value|default_if_none:'' }}</textarea>
+        <textarea class="form-control"
+                  id="quote"
+                  name="quote"
+                  rows="4">
+            {{ form.quote.value|default_if_none:'' }}
+        </textarea>
         {% if form.quote.errors %}
         <div class="text-danger">{{ form.quote.errors }}</div>
         {% endif %}

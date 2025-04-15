@@ -142,7 +142,7 @@ class PendingDataView(View):
             pending_author = CreateAuthor.objects.get(id=item_id)  # noqa
 
             if action == "approve":
-                quote = Quote.objects.create(  # noqa
+                quote = Author.objects.create(  # noqa
                     name=pending_author.name,
                     born_date=pending_author.born_date,
                     born_location=pending_author.born_location,
