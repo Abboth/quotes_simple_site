@@ -1,7 +1,9 @@
+from services.scraper import main as scraper  # NOQA
 from .models import Quote, Author, Tag, CreateQuote, CreateAuthor
 from quotes.utils.utils import get_top_tags  # noqa
 from .forms import CreateQuoteForm, CreateAuthorForm
 
+from celery import shared_task
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
@@ -14,6 +16,18 @@ from django.views import View
 
 def is_moderator(user):
     return user.is_superuser
+
+
+@shared_task
+def scrape_quotes(request):
+    try:
+        if request.method == 'POST':
+            scraper()
+            messages.info(request, "Scraping started")
+    except Exception as e:
+        messages.error(request, f"Scraping failed: {str(e)}")
+
+    return redirect('quotes:root')
 
 
 def quotes_views(request):

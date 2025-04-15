@@ -6,6 +6,7 @@ import sys
 from aiohttp import ClientSession, ClientConnectorError
 from asgiref.sync import sync_to_async
 from bs4 import BeautifulSoup
+from celery import shared_task
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "quotes_site.settings")
@@ -13,7 +14,7 @@ import django
 
 django.setup()
 
-from quotes.models import Author, Quote, Tag
+from quotes.models import Author, Quote, Tag  # noqa
 
 logging.basicConfig(level=logging.INFO)
 
@@ -59,6 +60,31 @@ async def parse_author(session: ClientSession, author_url: str) -> dict:
         return author_biography
 
 
+async def scrape_quotes_and_authors():
+    base_url = "https://quotes.toscrape.com"
+    authors_urls = set()
+    quotes = []
+    authors = []
+
+    async with ClientSession() as session:
+        page_tasks = [fetch_page(session, f"{base_url}/page/{i}/") for i in range(1, 11)]
+        pages = await asyncio.gather(*page_tasks)
+
+        for page in pages:
+            if page:
+                quotes.extend(await parse_quotes(page))
+                soup = BeautifulSoup(page, 'lxml')
+                for quote in soup.find_all("div", class_="quote"):
+                    authors_urls.add(base_url + quote.find("a")["href"])
+
+        author_tasks = [parse_author(session, url) for url in authors_urls]
+        authors_data = await asyncio.gather(*author_tasks)
+        authors = [author for author in authors_data if author]
+
+    await save_to_db(authors, quotes)
+    logging.info("All data successfully scraped and saved to DB.")
+
+
 @sync_to_async
 def save_to_db(authors: list[dict], quotes: list[dict]):
     existing_authors = set(Author.objects.values_list("name", flat=True))
@@ -91,35 +117,14 @@ def save_to_db(authors: list[dict], quotes: list[dict]):
     for quote in Quote.objects.filter(quote__in=quote_tags_map.keys()):
         quote.tags.set(quote_tags_map[quote.quote])
 
-
-async def scrape_quotes_and_authors():
-    base_url = "https://quotes.toscrape.com"
-    authors_urls = set()
-    quotes = []
-    authors = []
-
-    async with ClientSession() as session:
-        page_tasks = [fetch_page(session, f"{base_url}/page/{i}/") for i in range(1, 11)]
-        pages = await asyncio.gather(*page_tasks)
-
-        for page in pages:
-            if page:
-                quotes.extend(await parse_quotes(page))
-                soup = BeautifulSoup(page, 'lxml')
-                for quote in soup.find_all("div", class_="quote"):
-                    authors_urls.add(base_url + quote.find("a")["href"])
-
-        author_tasks = [parse_author(session, url) for url in authors_urls]
-        authors_data = await asyncio.gather(*author_tasks)
-        authors = [author for author in authors_data if author]
-
-    await save_to_db(authors, quotes)
-    logging.info("All data successfully scraped and saved to DB.")
+    return {
+        'authors_count': len(new_authors),
+        'quotes_count': len(new_quotes),
+        'tags_count': len(new_tags)
+    }
 
 
+@shared_task
 def main():
-    asyncio.run(scrape_quotes_and_authors())
-
-
-if __name__ == "__main__":
-    main()
+    new_data_counts = asyncio.run(scrape_quotes_and_authors())
+    return new_data_counts

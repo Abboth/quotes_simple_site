@@ -7,6 +7,16 @@
         {% if user.is_authenticated %}
         <a href="{% url 'quotes:add_quote' %}" class="btn btn-success mb-3 w-100">➕ Add Quote</a>
         {% endif %}
+        {% if request.user.is_superuser %}
+        <div class="text-center my-3">
+            <form action="{% url 'quotes:scrape_quotes' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary position-relative">
+                    Scrap Quotes from quotes.toscrape
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
     <div class="col-md-8">
         {% for quote in page_obj %}

@@ -11,5 +11,6 @@ urlpatterns = [
     path("add_quote/", views.add_quote, name="add_quote"),
     path("add_author/", views.add_author, name="add_author"),
     path('moderation/', views.PendingDataView.as_view(), name='pending_data'),
+    path('scrape/', views.scrape_quotes, name='scrape_quotes'),
     path('ajax/get_authors/', views.get_authors, name='get_authors'),
 ]
