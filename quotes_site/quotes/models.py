@@ -46,7 +46,7 @@ class Quote(models.Model):
         return self.quote[:50]
 
 
-class PendingQuote(models.Model):
+class CreateQuote(models.Model):
     quote = models.TextField()
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tag)
@@ -58,7 +58,7 @@ class PendingQuote(models.Model):
     )
 
 
-class PendingAuthor(models.Model):
+class CreateAuthor(models.Model):
     name = models.CharField(max_length=80)
     born_date = models.CharField(max_length=50)
     born_location = models.CharField(max_length=255)

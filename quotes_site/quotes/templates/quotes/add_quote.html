@@ -2,54 +2,69 @@
 
 {% block content %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link
-        rel="stylesheet"
-        href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
-/>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
-<div class="mb-3">
-    <label for="author_fullname_choose" class="form-label">Author</label>
-    <input type="text" class="form-control" id="author_fullname_choose"
-           placeholder="start to write and choose, or create new one if not exist's">
-    <div id="author-not-found" class="mt-2" style="display: none;">
-        <a href="/add_author/" class="btn btn-sm btn-warning">Not exist author in database, create it here</a>
-    </div>
-</div>
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
 
-<script>
-    $(function() {
-        $("#author_fullname_choose").autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: "{% url 'quotes:get_authors' %}",
-                    data: {
-                        term: request.term
-                    },
-                    success: function(data) {
-                        response(data);
-                        if (data.length === 0) {
-                            $("#author-not-found").show();
-                        } else {
-                            $("#author-not-found").hide();
+    <div class="mb-3">
+        <label for="author" class="form-label">Author</label>
+        <input type="text"
+               name="author"
+               id="author"
+               class="form-control"
+               placeholder="start to write and choose, or create new one if not exist's"
+               value="{{ form.author.value|default_if_none:'' }}">
+        {% if form.author.errors %}
+        <div class="text-danger">{{ form.author.errors }}</div>
+        {% endif %}
+        <div id="author-not-found" class="mt-2" style="display: none;">
+            <a href="/add_author/" class="btn btn-sm btn-warning">Not exist author in database, create it here</a>
+        </div>
+    </div>
+
+    <script>
+        $(function() {
+            $("#author").autocomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: "{% url 'quotes:get_authors' %}",
+                        data: { term: request.term },
+                        success: function(data) {
+                            response(data);
+                            $("#author-not-found").toggle(data.length === 0);
                         }
-                    }
-                });
-            },
-            minLength: 2,
+                    });
+                },
+                minLength: 2,
+            });
         });
-    });
-</script>
-<div class="mb-3">
-    <label for="new_quote" class="form-label">Quote</label>
-    <textarea class="form-control" id="new_quote" rows="4"></textarea>
-</div>
-<div class="mb-3">
-    <label for="tags" class="form-label">Tags</label>
-    <input type="email" class="form-control" id="tags"
-           placeholder="separate by ','">
-</div>
-<div class="d-flex justify-content-center">
-    <a href="{% url 'users:login' %}" class="btn btn-primary">Submit</a>
-</div>
+    </script>
+
+    <div class="mb-3">
+        <label for="quote" class="form-label">Quote</label>
+        <textarea class="form-control" id="quote" name="quote"
+                  rows="4">{{ form.quote.value|default_if_none:'' }}</textarea>
+        {% if form.quote.errors %}
+        <div class="text-danger">{{ form.quote.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        <label for="tags" class="form-label">Tags</label>
+        <input type="text" class="form-control" id="tags" name="tags"
+               placeholder="separate by ','"
+               value="{{ form.tags.value|default_if_none:'' }}">
+        {% if form.tags.errors %}
+        <div class="text-danger">{{ form.tags.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
 {% endblock %}

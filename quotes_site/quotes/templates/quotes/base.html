@@ -32,13 +32,13 @@
         </div>
     </div>
 
-    {% if pending_quotes_count > 0 %}
+    {% if request.user.is_superuser and pending_data_count > 0 %}
     <div class="text-center my-3">
-        <a href="{% url 'quotes:pending_quotes' %}" class="btn btn-primary position-relative">
+        <a href="{% url 'quotes:pending_data' %}" class="btn btn-primary position-relative">
             Pending Quotes
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            {{ pending_quotes_count }}
-        </span>
+                {{ pending_data_count }}
+            </span>
         </a>
     </div>
     {% endif %}
