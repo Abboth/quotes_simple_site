@@ -1,0 +1,86 @@
+{% extends 'quotes/base.html' %}
+
+{% block content %}
+<h1>Модерация содержимого</h1>
+
+<div>
+    <button onclick="showBlock('authors')">Авторы</button>
+    <button onclick="showBlock('quotes')">Цитаты</button>
+</div>
+
+<div id="authors_block" style="display: none;">
+    <h2>Waiting authors for approving</h2>
+    {% if authors %}
+    {% for author in authors %}
+    <div class="card">
+        <p>author:<strong> {{ author.name }}</strong></p>
+        <p>born date and location: {{ author.born_date }} – {{ author.born_location }}</p>
+        <p>description: {{ author.description }}</p>
+        <p>created by user: {{ author.created_by_user }}</p>
+        <form method="post" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="type" value="author">
+            <input type="hidden" name="id" value="{{ author.id }}">
+            <input type="hidden" name="action" value="approve">
+            <button type="submit">Approve</button>
+        </form>
+        <form method="post" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="type" value="author">
+            <input type="hidden" name="id" value="{{ author.id }}">
+            <input type="hidden" name="action" value="reject">
+            <button type="submit">Reject</button>
+        </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>No authors for check</p>
+    {% endif %}
+</div>
+
+<div id="quotes_block" style="display: none;">
+    <h2>Waiting quotes for approving</h2>
+    {% if quotes %}
+    {% for quote in quotes %}
+    <div class="card">
+        <p>quote: "{{ quote.quote }}"</p>
+        <p>author: {{ quote.author.name }}</p>
+        <p>tegs:
+            {% for tag in quote.tags.all %}
+            {{ tag.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+        <p>created by user: {{ quote.created_by_user }}</p>
+        <form method="post" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="type" value="quotes">
+            <input type="hidden" name="id" value="{{ quote.id }}">
+            <input type="hidden" name="action" value="approve">
+            <button type="submit">Approve</button>
+        </form>
+        <form method="post" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="type" value="quotes">
+            <input type="hidden" name="id" value="{{ quote.id }}">
+            <input type="hidden" name="action" value="reject">
+            <button type="submit">reject</button>
+        </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>No quotes</p>
+    {% endif %}
+</div>
+
+<script>
+    function showBlock(type) {
+        document.getElementById('authors_block').style.display = (type === 'authors') ? 'block' : 'none';
+        document.getElementById('quotes_block').style.display = (type === 'quotes') ? 'block' : 'none';
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        showBlock('authors');
+    });
+</script>
+
+{% endblock %}
