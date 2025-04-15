@@ -6,7 +6,6 @@ import sys
 from aiohttp import ClientSession, ClientConnectorError
 from asgiref.sync import sync_to_async
 from bs4 import BeautifulSoup
-from celery import shared_task
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "quotes_site.settings")
@@ -124,7 +123,5 @@ def save_to_db(authors: list[dict], quotes: list[dict]):
     }
 
 
-@shared_task
 def main():
-    new_data_counts = asyncio.run(scrape_quotes_and_authors())
-    return new_data_counts
+    asyncio.run(scrape_quotes_and_authors())

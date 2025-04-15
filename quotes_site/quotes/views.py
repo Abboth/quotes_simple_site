@@ -3,7 +3,6 @@ from .models import Quote, Author, Tag, CreateQuote, CreateAuthor
 from quotes.utils.utils import get_top_tags  # noqa
 from .forms import CreateQuoteForm, CreateAuthorForm
 
-from celery import shared_task
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
@@ -18,7 +17,6 @@ def is_moderator(user):
     return user.is_superuser
 
 
-@shared_task
 def scrape_quotes(request):
     try:
         if request.method == 'POST':
