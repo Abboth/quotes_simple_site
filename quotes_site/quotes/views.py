@@ -1,4 +1,5 @@
-from services.scraper import main as scraper  # NOQA
+from django.core.cache import cache
+from services.scraper import run_scraping  # NOQA
 from .models import Quote, Author, Tag, CreateQuote, CreateAuthor
 from quotes.utils.utils import get_top_tags  # noqa
 from .forms import CreateQuoteForm, CreateAuthorForm
@@ -17,10 +18,11 @@ def is_moderator(user):
     return user.is_superuser
 
 
+@user_passes_test(is_moderator)
 def scrape_quotes(request):
     try:
         if request.method == 'POST':
-            scraper()
+            run_scraping.delay(request.user.id)
             messages.info(request, "Scraping started")
     except Exception as e:
         messages.error(request, f"Scraping failed: {str(e)}")
@@ -29,6 +31,11 @@ def scrape_quotes(request):
 
 
 def quotes_views(request):
+    message = cache.get(f"scrape_result_{request.user.id}")
+    if message:
+        messages.success(request, message)
+        cache.delete(f"scrape_result_{request.user.id}")
+
     quotes = Quote.objects.select_related("author").prefetch_related("tags").order_by("id")  # noqa
 
     paginator = Paginator(quotes, 10)

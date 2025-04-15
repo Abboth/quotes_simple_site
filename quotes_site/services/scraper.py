@@ -6,6 +6,8 @@ import sys
 from aiohttp import ClientSession, ClientConnectorError
 from asgiref.sync import sync_to_async
 from bs4 import BeautifulSoup
+from celery import shared_task
+from django.core.cache import cache
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "quotes_site.settings")
@@ -80,8 +82,9 @@ async def scrape_quotes_and_authors():
         authors_data = await asyncio.gather(*author_tasks)
         authors = [author for author in authors_data if author]
 
-    await save_to_db(authors, quotes)
+    stats = await save_to_db(authors, quotes)
     logging.info("All data successfully scraped and saved to DB.")
+    return stats
 
 
 @sync_to_async
@@ -123,5 +126,21 @@ def save_to_db(authors: list[dict], quotes: list[dict]):
     }
 
 
-def main():
-    asyncio.run(scrape_quotes_and_authors())
+logger = logging.getLogger(__name__)
+
+
+@shared_task()
+def run_scraping(user_id):
+    stats = asyncio.run(scrape_quotes_and_authors())
+
+    if stats["authors_count"] == 0 and stats["quotes_count"] == 0 and stats["tags_count"] == 0:
+        message = "Scraping completed. No new records added. Database is up to date."
+    else:
+        message = (
+            f"Scraping finished: "
+            f"+{stats['quotes_count']} quotes, "
+            f"+{stats['authors_count']} authors, "
+            f"+{stats['tags_count']} tags."
+        )
+
+    cache.set(f"scrape_result_{user_id}", message, timeout=60)
