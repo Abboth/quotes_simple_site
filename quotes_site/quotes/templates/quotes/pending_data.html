@@ -1,11 +1,9 @@
 {% extends 'quotes/base.html' %}
 
 {% block content %}
-<h1>Модерация содержимого</h1>
-
 <div>
-    <button onclick="showBlock('authors')">Авторы</button>
-    <button onclick="showBlock('quotes')">Цитаты</button>
+    <button onclick="showBlock('authors')">Pending Authors</button>
+    <button onclick="showBlock('quotes')">Pending Quotes</button>
 </div>
 
 <div id="authors_block" style="display: none;">
@@ -63,7 +61,7 @@
             <input type="hidden" name="type" value="quotes">
             <input type="hidden" name="id" value="{{ quote.id }}">
             <input type="hidden" name="action" value="reject">
-            <button type="submit">reject</button>
+            <button type="submit">Reject</button>
         </form>
     </div>
     {% endfor %}
