@@ -14,14 +14,14 @@ User registration and authentication
 
 Submit new quotes (pending admin approval)
 
-Add new authors to the database
+Submit new authors (pending admin approval)
 
 Admin Tools
 Quote moderation system (approve/reject user submissions)
 
-One-click web scraping (Celery + Redis) for superusers
+One-click button web scraping (Celery + Redis) for superusers
 
-Scrapes quotes from external sources
+Scrapes quotes from quotes.toscrape
 
 Auto-imports new authors/tags
 
