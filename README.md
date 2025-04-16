@@ -1,4 +1,4 @@
-Quote Collection Platform
+Quote Collection Platform based via Django
 
 Public Access
 Browse paginated quotes
