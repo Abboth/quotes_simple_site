@@ -131,16 +131,4 @@ logger = logging.getLogger(__name__)
 
 @shared_task()
 def run_scraping(user_id):
-    stats = asyncio.run(scrape_quotes_and_authors())
-
-    if stats["authors_count"] == 0 and stats["quotes_count"] == 0 and stats["tags_count"] == 0:
-        message = "Scraping completed. No new records added. Database is up to date."
-    else:
-        message = (
-            f"Scraping finished: "
-            f"+{stats['quotes_count']} quotes, "
-            f"+{stats['authors_count']} authors, "
-            f"+{stats['tags_count']} tags."
-        )
-
-    cache.set(f"scrape_result_{user_id}", message, timeout=60)
+    asyncio.run(scrape_quotes_and_authors())
