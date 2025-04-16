@@ -22,7 +22,7 @@ def is_moderator(user):
 def scrape_quotes(request):
     try:
         if request.method == 'POST':
-            run_scraping.delay(request.user.id)
+            run_scraping.delay()
             messages.info(request, "Scraping started")
     except Exception as e:
         messages.error(request, f"Scraping failed: {str(e)}")
@@ -31,11 +31,6 @@ def scrape_quotes(request):
 
 
 def quotes_views(request):
-    message = cache.get(f"scrape_result_{request.user.id}")
-    if message:
-        messages.success(request, message)
-        cache.delete(f"scrape_result_{request.user.id}")
-
     quotes = Quote.objects.select_related("author").prefetch_related("tags").order_by("id")  # noqa
 
     paginator = Paginator(quotes, 10)

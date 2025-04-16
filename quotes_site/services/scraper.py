@@ -130,5 +130,5 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task()
-def run_scraping(user_id):
+def run_scraping():
     asyncio.run(scrape_quotes_and_authors())
