@@ -7,4 +7,4 @@ app = Celery("quotes_site")
 app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
-import services.scraper
+from services import scraper
